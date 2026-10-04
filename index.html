@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBERPUNK SPEEDOMETER</title>
+    <!-- 사이버펑크 느낌의 구글 폰트 불러오기 -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #05050a;
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 사이버펑크 배경 스캔라인 효과 */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 14px;
+            letter-spacing: 5px;
+            color: #ff0055;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #ff0055;
+        }
+
+        #speed {
+            font-size: 110px;
+            font-weight: 900;
+            color: #00ffcc;
+            text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc;
+            margin: 0;
+            transition: color 0.2s;
+        }
+
+        .unit {
+            font-size: 20px;
+            color: #8888aa;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        #status {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #555577;
+            letter-spacing: 1px;
+        }
+
+        /* --- 40km/h 초과 시 작동하는 경고 및 흔들림 애니메이션 --- */
+        .danger-mode {
+            background-color: #1a0005 !important;
+            animation: bgPulse 0.5s infinite alternate;
+        }
+
+        .danger-mode #speed {
+            color: #ff0033 !important;
+            text-shadow: 0 0 20px #ff0033, 0 0 40px #ff0033, 0 0 60px #ff0033 !important;
+            animation: glitchShake 0.15s infinite;
+        }
+
+        .danger-mode .title {
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        @keyframes glitchShake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-3px, 3px) rotate(-1deg); }
+            40% { transform: translate(3px, -2px) rotate(1deg); }
+            60% { transform: translate(-2px, -3px) rotate(0deg); }
+            80% { transform: translate(2px, 2px) rotate(1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        @keyframes bgPulse {
+            0% { background-color: #1a0005; }
+            100% { background-color: #33000a; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="title">SYS.GPS // VELOCITY</div>
+        <div id="speed">0.0</div>
+        <div class="unit">KM / H</div>
+        <div id="status">GPS 연결 대기 중...</div>
+    </div>
+
+    <script>
+        const speedElement = document.getElementById('speed');
+        const statusElement = document.getElementById('status');
+        const bodyElement = document.body;
+
+        if ("geolocation" in navigator) {
+            statusElement.innerText = "GPS 신호 탐색 중...";
+            
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    statusElement.innerText = "ONLINE";
+                    
+                    // position.coords.speed는 m/s 단위 -> km/h 변환
+                    let speedMs = position.coords.speed || 0;
+                    let speedKmh = speedMs * 3.6;
+                    
+                    speedElement.innerText = speedKmh.toFixed(1);
+
+                    // 40km/h 초과 시 사이버펑크 경고 & 글리치 효과 활성화
+                    if (speedKmh > 40) {
+                        bodyElement.classList.add('danger-mode');
+                        statusElement.innerText = "⚠️ OVERLOAD WARNING: > 40 KM/H";
+                    } else {
+                        bodyElement.classList.remove('danger-mode');
+                        statusElement.innerText = "ONLINE";
+                    }
+                },
+                (error) => {
+                    statusElement.innerText = "GPS 오류: " + error.message;
+                },
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+            );
+        } else {
+            statusElement.innerText = "이 브라우저는 위치 정보를 지원하지 않습니다.";
+        }
+    </script>
+</body>
+</html>
