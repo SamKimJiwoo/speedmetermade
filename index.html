@@ -132,10 +132,10 @@
                     
                     speedElement.innerText = speedKmh.toFixed(1);
 
-                    // 40km/h 초과 시 사이버펑크 경고 & 글리치 효과 활성화
-                    if (speedKmh > 40) {
+                    // 20km/h 초과 시 사이버펑크 경고 & 글리치 효과 활성화
+                    if (speedKmh > 20) {
                         bodyElement.classList.add('danger-mode');
-                        statusElement.innerText = "⚠️ OVERLOAD WARNING: > 40 KM/H";
+                        statusElement.innerText = "⚠️ OVERLOAD WARNING: > 20 KM/H";
                     } else {
                         bodyElement.classList.remove('danger-mode');
                         statusElement.innerText = "ONLINE";
